@@ -11,7 +11,6 @@ import zipfile
 from dash import dcc
 import dash_daq as daq
 import base64
-import plotly.io as pio
 
 # Load your data
 # ctdis_data = pd.read_csv("Cts Dispensing pattern.csv", index_col=0).apply(pd.to_numeric, errors='coerce').fillna(-1.0)
@@ -140,8 +139,6 @@ app.layout = html.Div([
     # App title (left-aligned)
     html.H1("Plate Monkey Analysis", style={'textAlign': 'left', "font-family": "Arial", 'padding-left': '10px'}),
 
-    dcc.Store(id='color-ranges-store'),
-
     # Add Color Range button
     html.Div([
         html.Button('➕ Add Color Range', id='add-range-btn', n_clicks=0),
@@ -250,13 +247,7 @@ def modify_color_ranges(add_clicks, remove_clicks, children):
                 'box-shadow': '0 2px 4px rgba(0,0,0,0.1)'
             }),
         ], id={'type': 'color-range-block', 'index': index},
-           style={'display': 'inline-block', 'margin-right': '15px', 'margin-bottom': '10px'}),
-        
-        html.Div([
-            html.Button("⬇️ Download Bar Chart (JPEG)", id="download-bar-jpeg-btn"),
-            dcc.Download(id="download-bar-jpeg")
-        ])
-
+           style={'display': 'inline-block', 'margin-right': '15px', 'margin-bottom': '10px'})
 
         children.append(new_child)
         return children
@@ -276,7 +267,6 @@ def modify_color_ranges(add_clicks, remove_clicks, children):
 @app.callback(
     [Output("heatmap-plot", "figure"),
      Output("bar-chart", "figure"),
-     Output("color-ranges-store", "data"),
      Output("pie-chart", "figure")],
     Input("update-btn", "n_clicks"),
     State({'type': 'range-min', 'index': ALL}, 'value'),
@@ -285,8 +275,7 @@ def modify_color_ranges(add_clicks, remove_clicks, children):
 )
 def update_visualizations(n_clicks, mins, maxes, colors):
     if not mins or not maxes or not colors:
-        return go.Figure(), go.Figure(), {}, go.Figure()
-
+        return go.Figure(), go.Figure(), go.Figure()
 
     selected_color_ranges = {
         color['hex']: (min_v, max_v)
@@ -295,7 +284,7 @@ def update_visualizations(n_clicks, mins, maxes, colors):
     }
 
     if not selected_color_ranges:
-        return go.Figure(), go.Figure(), {}, go.Figure()
+        return go.Figure(), go.Figure(), go.Figure()
 
     # Heatmap logic (your provided logic)
     z = ctdis_data.values
@@ -360,7 +349,26 @@ def update_visualizations(n_clicks, mins, maxes, colors):
     pie_chart_fig.update_layout(title="Distribution of Sample Types", width=500, height=500
 )
 
-    return heatmap_fig, bar_chart_fig, selected_color_ranges, pie_chart_fig
+    return heatmap_fig, bar_chart_fig, pie_chart_fig
+
+@app.callback(
+    Output("download-zip", "data"),
+    Input("download-zip-btn", "n_clicks"),
+    prevent_initial_call=True
+)
+def create_zip_file(n_clicks):
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, 'w') as zf:
+        for file_name in ['Assay_dispensing.csv', 'Sample_dispensing.csv', 'Cts Dispensing pattern.csv']:
+            try:
+                with open(file_name, 'rb') as f:
+                    zf.writestr(file_name, f.read())
+            except FileNotFoundError:
+                print(f"File {file_name} not found.")
+
+    buffer.seek(0)
+    
+    return dcc.send_bytes(buffer.getvalue(), filename="plate_monkey_template.zip")
 
 if __name__ == "__main__":
-    app.run_server(debug=True, port=3600)
+    app.run_server(debug=True, port=4000)
