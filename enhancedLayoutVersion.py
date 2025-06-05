@@ -139,14 +139,6 @@ app.layout = html.Div([
     # App title (left-aligned)
     html.H1("Plate Monkey Analysis", style={'textAlign': 'left', "font-family": "Arial", 'padding-left': '10px'}),
 
-    # Add Color Range button
-    html.Div([
-        html.Button('➕ Add Color Range', id='add-range-btn', n_clicks=0),
-    ], style={'textAlign': 'left', 'padding-left': '10px', "font-family": "Arial", 'margin-bottom': '20px'}),
-
-    # Dynamic color-range container
-    html.Div(id='color-range-container', children=[], style={'padding-left': '10px'}),
-
     # Upload file
     html.Div([
         html.H3("📤 Upload Your Datasets", style={'font-family': 'Arial'}),
@@ -172,6 +164,14 @@ app.layout = html.Div([
             html.Div(id='sample-status', style={'color': 'green'})
         ]),
     ], style={'padding': '20px', 'font-family': 'Arial'}),
+
+    # Add Color Range button
+    html.Div([
+        html.Button('➕ Add Color Range', id='add-range-btn', n_clicks=0),
+    ], style={'textAlign': 'left', 'padding-left': '10px', "font-family": "Arial", 'margin-bottom': '20px'}),
+
+    # Dynamic color-range container
+    html.Div(id='color-range-container', children=[], style={'padding-left': '10px'}),
 
     # Update and Download buttons
     html.Div([
@@ -289,7 +289,7 @@ def update_visualizations(n_clicks, mins, maxes, colors):
     # Heatmap logic (your provided logic)
     z = ctdis_data.values
     combined_hover_text = (
-        "Sample ID: " + assay_data.astype(str) + "<br>Sample Type: " + sample_data.astype(str)
+        "Assay ID: " + assay_data.astype(str) + "<br>Sample ID: " + sample_data.astype(str)
     ).values
 
     zmin, zmax = np.nanmin(z), np.nanmax(z)
