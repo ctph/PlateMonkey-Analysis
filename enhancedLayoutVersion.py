@@ -118,7 +118,6 @@ def calculate_color_counts(data, color_ranges):
     return counts
 
 app.layout = html.Div([
-    # Corrected CSS Injection
     dcc.Markdown('''
         <style>
             * { font-family: Arial, sans-serif; box-sizing: border-box; }
@@ -176,8 +175,6 @@ app.layout = html.Div([
     # Update and Download buttons
     html.Div([
         html.Button("📊 Update Heatmap and Charts", id="update-btn"),
-        # html.Button("📥 Download All Data (ZIP)", id="download-zip-btn"),
-        # dcc.Download(id="download-zip")
     ], style={'textAlign': 'left', 'padding-left': '10px', "font-family": "Arial", 'margin-top': '20px', 'font-size': '16px'}),
 
     # Graphs layout: heatmap on top, bar + pie side by side
@@ -211,21 +208,23 @@ def modify_color_ranges(add_clicks, remove_clicks, children):
         index = add_clicks  # Safe since n_clicks is always increasing
         new_child = html.Div([
             html.Div([
-                html.Label("Min:", style={'font-weight': 'bold', "font-family": "Arial", 'font-size': '16px'}),
+                html.Label("Min (Max 3 Decimal Point):", style={'font-weight': 'bold', "font-family": "Arial", 'font-size': '16px'}),
                 dcc.Input(
                     id={'type': 'range-min', 'index': index},
                     type='number',
                     placeholder='Min',
+                    step='0.001',
                     style={'width': '80px', 'padding': '5px'}
                 ),
             ], style={'display': 'flex', 'flexDirection': 'column'}),
 
             html.Div([
-                html.Label("Max:", style={'font-weight': 'bold', "font-family": "Arial", 'font-size': '16px'}),
+                html.Label("Max (Max 3 Decimal Point):", style={'font-weight': 'bold', "font-family": "Arial", 'font-size': '16px'}),
                 dcc.Input(
                     id={'type': 'range-max', 'index': index},
                     type='number',
                     placeholder='Max',
+                    step='0.001',
                     style={'width': '80px', 'padding': '5px'}
                 ),
             ], style={'display': 'flex', 'flexDirection': 'column'}),
@@ -371,4 +370,4 @@ def create_zip_file(n_clicks):
     return dcc.send_bytes(buffer.getvalue(), filename="plate_monkey_template.zip")
 
 if __name__ == "__main__":
-    app.run_server(debug=True, port=4000)
+    app.run_server(debug=True, port=4300)
